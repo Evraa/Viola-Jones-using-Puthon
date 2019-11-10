@@ -1,29 +1,32 @@
-
-
 import skimage.io as io
-import matplotlib.pyplot as plt
-import numpy as np
 from skimage.exposure import histogram
-from matplotlib.pyplot import bar
 from skimage.color import rgb2gray,rgb2hsv
-
-# Convolution:
-from scipy.signal import convolve2d
-from scipy import fftpack
-import math
-
 from skimage.util import random_noise
 from skimage.filters import median
 from skimage.feature import canny
 
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
-
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import bar
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
+# Convolution: If not needed, delete it later
+from scipy.signal import convolve2d
+from scipy import fftpack
+import math
+
+#Used for Adaboost classifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn import datasets
+
+import numpy as np
 from PIL import Image, ImageOps
-# Edges
-from skimage.filters import sobel_h, sobel, sobel_v,roberts, prewitt
+
+
+
+
+
 
 # Show the figures / plots inside the notebook
 def show_images(images,titles=None):
@@ -45,45 +48,7 @@ def show_images(images,titles=None):
     fig.set_size_inches(np.array(fig.get_size_inches()) * n_ims)
     plt.show() 
     
-'''
-def show_3d_image(img, title):
-    fig = plt.figure()
-    fig.set_size_inches((12,8))
-    ax = fig.gca(projection='3d')
 
-    # Make data.
-    X = np.arange(0, img.shape[0], 1)
-    Y = np.arange(0, img.shape[1], 1)
-    X, Y = np.meshgrid(X, Y)
-    Z = img[X,Y]
-
-    # Plot the surface.
-    surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
-                           linewidth=0, antialiased=False)
-
-    # Customize the z axis.
-    ax.set_zlim(0, 8)
-    ax.zaxis.set_major_locator(LinearLocator(10))
-    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-
-    # Add a color bar which maps values to colors.
-    fig.colorbar(surf, shrink=0.5, aspect=5)
-    ax.set_title(title)
-    plt.show()
-'''
-'''
-def show_3d_image_filtering_in_freq(img, f):
-    img_in_freq = fftpack.fft2(img)
-    filter_in_freq = fftpack.fft2(f, img.shape)
-    filtered_img_in_freq = np.multiply(img_in_freq, filter_in_freq)
-    
-    img_in_freq = fftpack.fftshift(np.log(np.abs(img_in_freq)+1))
-    filtered_img_in_freq = fftpack.fftshift(np.log(np.abs(filtered_img_in_freq)+1))
-    
-    show_3d_image(img_in_freq, 'Original Image')
-    show_3d_image(filtered_img_in_freq, 'Filtered Image')
-
-'''
 def showHist(img):
     # An "interface" to matplotlib.axes.Axes.hist() method
     plt.figure()
@@ -99,11 +64,125 @@ def Grey_img(image):
         grey_image = image/255
     return grey_image
 
-
+'''
 #to convert images from/to numpy array
 def to_float_array(img: Image.Image) -> np.ndarray:
     return np.array(img).astype(np.float32) / 255.
 
 def to_image(values: np.ndarray) -> Image.Image:
     return Image.fromarray(np.uint8(values * 255.))
+'''
 
+#Class for stumps
+class DecisionStump():
+    def __init__(self):
+        # Determines if sample shall be classified as -1 or 1 given threshold
+        self.polarity = 1
+        # The index of the feature used to make classification
+        self.feature_index = None
+        # The threshold value that the feature should be measured against
+        self.threshold = None
+        # Value indicative of the classifier's accuracy
+        self.alpha = None
+
+#Class for Adaboost
+class Adaboost:
+    #M: is the #of base learners
+    def __init__(self,M):
+        self.M = M
+    def fit(self,X,Y):
+        #Variables for decision stumps and their corresponding alphas
+        self.models = []
+        self.alphas = []
+        #n: #od examples 
+        N, _ = X.shape
+        #W: array of weights fo each example, initialized with uniform equal values for all of them
+        W = np.ones(N) / N 
+        #We create punch of M stumps
+        for m in range(self.M):
+            tree = DecisionTreeClassifier(max_depth=1)
+            tree.fit(X,Y,sample_weight=W)
+            P = tree.predict(X)
+        #Calculate the error
+        err = W.dot(P != Y)
+        alpha = 0.5*(np.log(1-err) - np.log(err))
+        #Store theri alphas
+        W = W*np.exp(-alpha*Y*P)
+        W = W/W.sum()
+        #And then store these stumps
+        self.models.append(tree)
+        self.alphas.append(alpha)
+
+    def predict(self,X):
+        #we need to return accuracy here
+        N, _= X.shape
+        FX = np.zeros(N)
+        for alpha, tree in zip(self.alphas ,self.models):
+            FX += alpha*tree.predict(X)
+                #First return the accuracy
+        return np.sign(FX), FX
+
+    def score(self,X,Y):
+        P,FX = self.predict(X)
+        L = np.exp(-Y*FX).mean()
+        return np.mean(P == Y) , L
+
+
+if __name__ == '__main__':
+    #First we get the data
+    dataSet = datasets.load_digits()
+    X = dataSet.data
+    Y = dataSet.target
+    digit1 = 1
+    digit2 = 8
+    idx = np.append(np.where(Y == digit1)[0], np.where(Y == digit2)[0])
+    Y = dataSet.target[idx]
+    # Change labels to {-1, 1}
+    Y[Y == digit1] = -1
+    Y[Y == digit2] = 1
+    X = dataSet.data[idx]
+
+    #80% is training data and 20% is testing
+    Ntrain  = int(0.8*len(X))
+    Xtrain,Ytrain = X[:Ntrain], Y[:Ntrain]
+    Xtest,Ytest = X[Ntrain:], Y[Ntrain:]
+    
+    #T = # od iterations
+    
+    T = 200
+    train_errors = np.empty(T)
+    test_losses = np.empty(T)
+    test_errors = np.empty(T)
+    for num_trees in range(T):
+        if num_trees == 0:
+            train_errors [num_trees] = None
+            test_errors [num_trees] = None
+            test_losses [num_trees] = None
+            continue
+        if num_trees % 20 == 0:
+            print (num_trees)
+        model = Adaboost(num_trees)
+        model.fit(Xtrain, Ytrain)
+        acc , loss = model.score(Xtest,Ytest)
+        acc_train, _ = model.score(Xtrain ,Ytrain)
+
+        train_errors [num_trees] = 1 - acc_train
+        test_errors [num_trees] = 1 - acc
+        test_losses [num_trees] = loss
+        
+        if num_trees == T-1:
+            print("Finalt train error" , 1 - acc_train)
+            print("Finalt test error" , 1 - acc)
+
+    plt.plot(test_errors , label="test errors")
+    plt.plot(test_losses , label="test loss")
+    plt.legend()
+    plt.show()
+
+    plt.plot(train_errors , label="train errors")
+    plt.plot(test_errors , label="test errors")
+    plt.legend()
+    plt.show()
+
+    
+        
