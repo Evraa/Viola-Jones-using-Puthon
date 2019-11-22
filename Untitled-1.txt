@@ -1,0 +1,116 @@
+
+
+
+
+'''
+getting all the features of the shape 1x3
+'''
+x = features[2]
+count = 0
+
+for i in range(1,int(4/3)+1): # from i = 1 to i = 2
+    for j in range(1,5): # from i = 1 to i = 4
+        currentFeat = np.zeros((x[0]*j,x[1]*i))
+        print(currentFeat.shape)
+        currentFeat[:,0:int(x[1]*i/3)] = 1 # from 0 to the 1st third column 
+        currentFeat[:,int(x[1]*i/3):int(x[1]*i*(2/3))] = -1 # from 1st to the 2nd third column
+        currentFeat[:,int(x[1]*i*(2/3)):] = 1 # from 2nd to the 3rd third column
+        print(currentFeat)
+
+'''
+getting all the features of the shape 2x2
+'''
+x = features[4]
+count = 0
+
+for i in range(1,int(4/2)+1): # from i = 1 to i = 2
+    for j in range(1,int(4/2)+1): # from i = 1 to i = 4
+        currentFeat = np.zeros((x[0]*i,x[1]*j))
+        print(currentFeat.shape)
+        currentFeat[0:int(x[0]*i/2),0:int(x[1]*j/2)] = 1 # 1st quarter
+        currentFeat[0:int(x[0]*i/2),int(x[1]*j/2):] = -1 # 2nd quarter
+        currentFeat[int(x[0]*i/2):,0:int(x[1]*j/2)] = -1 # 3rd quarter
+        currentFeat[int(x[0]*i/2):,int(x[1]*j/2):] = 1 # 4th quarter
+        print(currentFeat)
+
+'''
+making the viola jones features and counting them
+'''
+
+'''
+getting all the features of the shape 1x2
+'''
+count = np.zeros(5)
+
+for i in range(1,int(24/2)+1): # from i = 1 to i = 12
+    for j in range(1,24+1): # from i = 1 to i = 24
+        currentFeat = np.zeros((x[0]*j,x[1]*i))
+        currentFeat[:,0:int(x[1]*i/2)] = 1 # the first vertical half
+        currentFeat[:,int(x[1]*i/2):] = -1 # the second vertical half
+        count[0] += (25 - currentFeat.shape[0]) * (25 - currentFeat.shape[1]) 
+
+print(count)
+
+'''
+getting all the features of the shape 2x1
+'''
+x = features[1]
+
+for i in range(1,int(24/2)+1): # from i = 1 to i = 12
+    for j in range(1,24+1): # from i = 1 to i = 24
+        currentFeat = np.zeros((x[0]*i,x[1]*j))
+        currentFeat[0:int(x[0]*i/2),:] = 1 # the first vertical half
+        currentFeat[int(x[0]*i/2):,:] = -1 # the second vertical half
+        count[1] += (25 - currentFeat.shape[0]) * (25 - currentFeat.shape[1])
+        
+print(count)
+
+'''
+getting all the features of the shape 1x3
+'''
+x = features[2]
+
+for i in range(1,int(24/3)+1): # from i = 1 to i = 8
+    for j in range(1,24+1): # from i = 1 to i = 24
+        currentFeat = np.zeros((x[0]*j,x[1]*i))
+        currentFeat[:,0:int(x[1]*i/3)] = 1 # from 0 to the 1st third column 
+        currentFeat[:,int(x[1]*i/3):int(x[1]*i*(2/3))] = -1 # from 1st to the 2nd third column
+        currentFeat[:,int(x[1]*i*(2/3)):] = 1 # from 2nd to the 3rd third column
+        count[2] += (25 - currentFeat.shape[0]) * (25 - currentFeat.shape[1])
+        
+print(count)
+
+'''
+getting all the features of the shape 3x1
+'''
+x = features[3]
+
+for i in range(1,int(24/3)+1): # from i = 1 to i = 8
+    for j in range(1,24+1): # from i = 1 to i = 24
+        currentFeat = np.zeros((x[0]*i,x[1]*j))
+        currentFeat[0:int(x[0]*i/3),:] = 1 # from 0 to the 1st third column 
+        currentFeat[int(x[0]*i/3):int(x[0]*i*(2/3)),:] = -1 # from 1st to the 2nd third column
+        currentFeat[int(x[0]*i*(2/3)):,:] = 1 # from 2nd to the 3rd third column
+        count[3] += (25 - currentFeat.shape[0]) * (25 - currentFeat.shape[1])
+        
+print(count)
+
+'''
+getting all the features of the shape 2x2
+'''
+x = features[4]
+
+for i in range(1,int(24/2)+1): # from i = 1 to i = 12
+    for j in range(1,int(24/2)+1): # from i = 1 to i = 12
+        currentFeat = np.zeros((x[0]*i,x[1]*j))
+        currentFeat[0:int(x[0]*i/2),0:int(x[1]*j/2)] = 1 # 1st quarter
+        currentFeat[0:int(x[0]*i/2),int(x[1]*j/2):] = -1 # 2nd quarter
+        currentFeat[int(x[0]*i/2):,0:int(x[1]*j/2)] = -1 # 3rd quarter
+        currentFeat[int(x[0]*i/2):,int(x[1]*j/2):] = 1 # 4th quarter
+        count[4] += (25 - currentFeat.shape[0]) * (25 - currentFeat.shape[1])
+        
+print(count)
+
+'''
+Creating a file with Haar features on it.
+'''
