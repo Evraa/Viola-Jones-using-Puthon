@@ -22,7 +22,7 @@ from sklearn import datasets
 
 import numpy as np
 from PIL import Image, ImageOps
-
+import os
 
 
 
@@ -64,12 +64,9 @@ def Grey_img(image):
     return grey_image
 
 #Resizing images for datasets
-def resizeBy24x24(img_dest, new_name):
-    img = Image.open(img_dest)
+def resizeBy24x24(img_dest):
+    img = Image.open(img_dest).convert('L')
     img_down = img.resize((24, 24), Image.ANTIALIAS)
-    ext = ".jpg"
-    img_down.save(new_name + ext)
-    img = io.imread(new_name + ext)
-    img = rgb2gray(img)
-    return img
-
+    return img_down
+    
+    

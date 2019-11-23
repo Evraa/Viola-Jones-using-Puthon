@@ -1,15 +1,16 @@
 from auxilaryFunctions import *
 #Class for stumps
-class DecisionStump():
-    def __init__(self):
-        # Determines if sample shall be classified as -1 or 1 given threshold
-        self.polarity = 1
-        # The index of the feature used to make classification
-        self.feature_index = None
-        # The threshold value that the feature should be measured against
-        self.threshold = None
-        # Value indicative of the classifier's accuracy
-        self.alpha = None
+
+# class DecisionStump():
+#     def __init__(self):
+#         # Determines if sample shall be classified as -1 or 1 given threshold
+#         self.polarity = 1
+#         # The index of the feature used to make classification
+#         self.feature_index = None
+#         # The threshold value that the feature should be measured against
+#         self.threshold = None
+#         # Value indicative of the classifier's accuracy
+#         self.alpha = None
 
 #Class for Adaboost
 class Adaboost:
