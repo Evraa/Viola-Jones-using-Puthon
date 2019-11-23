@@ -69,4 +69,23 @@ def resizeBy24x24(img_dest):
     img_down = img.resize((24, 24), Image.ANTIALIAS)
     return img_down
     
-    
+#Integral Image function
+def integralImage (image):
+    n,m = image.shape
+    II = np.zeros((n,m))
+    for i in range(0,n):
+        for j in range(0,m):
+            II[i,j] = sum(sum(image[0:i+1,0:j+1]))
+    return II    
+#To get zero mean and unit var. images
+def normalizeImages (image):
+    max_px = np.max(image)
+    min_px = np.min(image)
+    std = max_px - min_px
+    mean = image.mean()
+    image =(image - mean) / std
+    return image
+
+
+if __name__ == '__main__':
+    print("JI")
