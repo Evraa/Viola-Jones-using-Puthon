@@ -36,7 +36,7 @@ making the viola jones features and counting them
 
 def HaarFeatures(image=None):
     fileInput = open("HaarF.txt","w+") # assuming the image name would be stored in HaarF.txt
-    integralInput = integralImage(fileInput) # integral input would hold the intergal of the input image
+    integralInput = image # integral input would hold the intergal of the input image
     featuresVec = np.zeros(161000) # vector that would hold the 160K features of the 24x24 image
     featuresVecCounter = 0 # to move through the indeces
     
@@ -78,10 +78,10 @@ def HaarFeatures(image=None):
                     featuresVecCounter = featuresVecCounter + 1
                 
     '''
-    getting all the features of the shape 1x3
+    getting all the features of the shape 1x3 vertical 3
 
     '''
-    x = features[2] # x would hold featue 1x3
+    x = features[2] # x would hold featue 1x3 vertical 3
 
     for i in range(1,int(24/3)+1): # from i = 1 to i = 8
         for j in range(1,24+1): # from i = 1 to i = 24

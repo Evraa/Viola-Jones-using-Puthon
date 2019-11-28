@@ -12,17 +12,21 @@ faces_path = "D:/Part C/College Stuff/3A/Image Processing/IP project/dataset/Sma
 non_faces_path = "D:/Part C/College Stuff/3A/Image Processing/IP project/dataset/Small Images/non_faces_rgb_small/"
 faces = os.listdir(faces_path)
 non_faces = os.listdir(non_faces_path)
-
+X = np.zeros((200,161000))
+i=0
 for face in faces:
     img_path = faces_path + face
     img = io.imread(img_path)
     norm_img = normalizeImages(img)
     ii_image = integralImage(norm_img)
-    HaarFeatures(ii_image)
+    X[i,:] = HaarFeatures(ii_image)
+    i+=1
     
 for non_face in non_faces:
     img_path = non_faces_path + non_face
     img = io.imread(img_path)
     norm_img = normalizeImages(img)
     ii_image = integralImage(norm_img)
-    HaarFeatures(ii_image)
+    X[i,:] = HaarFeatures(ii_image)
+    i+=1
+    
