@@ -1,4 +1,5 @@
 from auxilaryFunctions import *
+from creating_classifiers import read_dataset
 #Class for stumps
 
 # class DecisionStump():
@@ -22,9 +23,9 @@ class Adaboost:
         self.models = []
         self.alphas = []
         #n: #od examples 
-        N, _ = X.shape
+        M, _ = X.shape
         #W: array of weights fo each example, initialized with uniform equal values for all of them
-        W = np.ones(N) / N 
+        W = np.ones(M) / M
         #We create punch of M stumps
         for m in range(self.M):
             tree = DecisionTreeClassifier(max_depth=1)
@@ -45,7 +46,9 @@ class Adaboost:
         N, _= X.shape
         FX = np.zeros(N)
         for alpha, tree in zip(self.alphas ,self.models):
-            FX += alpha*tree.predict(X)
+            tree_predict = tree.predict(X)
+            new_FX = alpha*tree_predict
+            FX += new_FX
                 #First return the accuracy
         return np.sign(FX), FX
 
@@ -57,24 +60,14 @@ class Adaboost:
 
 if __name__ == '__main__':
     #First we get the data
-    dataSet = datasets.load_digits()
-    X = dataSet.data
-    Y = dataSet.target
-    digit1 = 1
-    digit2 = 8
-    idx = np.append(np.where(Y == digit1)[0], np.where(Y == digit2)[0])
-    Y = dataSet.target[idx]
-    # Change labels to {-1, 1}
-    Y[Y == digit1] = -1
-    Y[Y == digit2] = 1
-    X = dataSet.data[idx]
+    X, Y = read_dataset(200)
+    
 
     #80% is training data and 20% is testing
     Ntrain  = int(0.8*len(X))
     Xtrain,Ytrain = X[:Ntrain], Y[:Ntrain]
     Xtest,Ytest = X[Ntrain:], Y[Ntrain:]
     
-    #T = # od iterations
     
     T = 200
     train_errors = np.empty(T)
@@ -90,6 +83,7 @@ if __name__ == '__main__':
             print (num_trees)
         model = Adaboost(num_trees)
         model.fit(Xtrain, Ytrain)
+
         acc , loss = model.score(Xtest,Ytest)
         acc_train, _ = model.score(Xtrain ,Ytrain)
 
