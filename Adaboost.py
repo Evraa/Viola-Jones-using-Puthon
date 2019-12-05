@@ -1,109 +1,162 @@
 from auxilaryFunctions import *
 from creating_classifiers import read_dataset
-#Class for stumps
+#import multiprocessing as mulp
+#import functools
+            
+#min_error = float('inf')
 
-# class DecisionStump():
-#     def __init__(self):
-#         # Determines if sample shall be classified as -1 or 1 given threshold
-#         self.polarity = 1
-#         # The index of the feature used to make classification
-#         self.feature_index = None
-#         # The threshold value that the feature should be measured against
-#         self.threshold = None
-#         # Value indicative of the classifier's accuracy
-#         self.alpha = None
+
+#Class for stumps
+class DecisionStump():
+    def __init__(self):
+        # Determines if sample shall be classified as -1 or 1 given threshold
+        self.polarity = 1
+        # The index of the feature used to make classification
+        self.feature_index = None
+        # The threshold value that the feature should be measured against
+        self.threshold = None
+        # Value indicative of the classifier's accuracy
+        self.alpha = None
 
 #Class for Adaboost
-class Adaboost:
-    #M: is the #of base learners
-    def __init__(self,M):
-        self.M = M
-    def fit(self,X,Y):
-        #Variables for decision stumps and their corresponding alphas
-        self.models = []
-        self.alphas = []
-        #n: #od examples 
-        M, _ = X.shape
-        #W: array of weights fo each example, initialized with uniform equal values for all of them
-        W = np.ones(M) / M
-        #We create punch of M stumps
-        for m in range(self.M):
-            tree = DecisionTreeClassifier(max_depth=1)
-            tree.fit(X,Y,sample_weight=W)
-            P = tree.predict(X)
-        #Calculate the error
-        err = W.dot(P != Y)
-        alpha = 0.5*(np.log(1-err) - np.log(err))
-        #Store theri alphas
-        W = W*np.exp(-alpha*Y*P)
-        W = W/W.sum()
-        #And then store these stumps
-        self.models.append(tree)
-        self.alphas.append(alpha)
 
-    def predict(self,X):
-        #we need to return accuracy here
-        N, _= X.shape
-        FX = np.zeros(N)
-        for alpha, tree in zip(self.alphas ,self.models):
-            tree_predict = tree.predict(X)
-            new_FX = alpha*tree_predict
-            FX += new_FX
-                #First return the accuracy
-        return np.sign(FX), FX
+ 
+#  Boosting method that uses a number of weak classifiers in ensemble to make a strong classifier.
+#  This implementation uses decision stumps, which is a one level Decision Tree. 
+#     Parameters:
+#     -----------
+#     n_clf: int
+#         The number of weak classifiers that will be used. 
 
-    def score(self,X,Y):
-        P,FX = self.predict(X)
-        L = np.exp(-Y*FX).mean()
-        return np.mean(P == Y) , L
+class Adaboost():
+    #number of weak classifiers
+    def __init__(self, n_clf=100):
+        self.n_clf = n_clf
+        
+    def fit(self, X, y):
+        m_samples, n_features = np.shape(X)
+        # Initialize 'M' weights to 1/M
+        w = np.ones([m_samples,1])
+        w /= m_samples
+        #list of classifiers
+        self.clfs = []
+        min_error = float('inf')
+        # Iterate through classifiers
+        for ev in range(self.n_clf):
+            #Create Decision Stump
+            self.clf = DecisionStump()
+
+            # Minimum error given for using a certain feature value threshold
+            # for predicting sample label
+           
+            # Iterate throught every unique feature value and see what value
+            # makes the best threshold for predicting y
+            for feature_i in range (n_features):
+                if(feature_i%1000 == 0):
+                    print (f'classifier: {ev} feature: {feature_i}')
+                feature_values = np.expand_dims(X[:, feature_i], axis=1)
+                unique_values = np.unique(feature_values)
+                # Try every unique feature value as threshold
+                for threshold in unique_values:
+                    p = 1
+                    # Set all predictions to '1' initially
+                    prediction = np.ones(np.shape(y))
+
+                    # Label the samples whose values are below threshold as '-1'
+                    #To detect false examples
+                    prediction[X[:, feature_i] < threshold] = -1
+
+                    # Error = sum of weights of misclassified samples
+                    miss_W = np.zeros([m_samples])
+                    for i in range(m_samples):
+                        if(y[i] != prediction[i]):
+                            miss_W[i] = w[i]
+                    error = sum(miss_W)
+                    
+                    # If the error is over 50% we flip the polarity so that samples that
+                    # were classified as 0 are classified as 1, and vice versa
+                    # E.g error = 0.8 => (1 - error) = 0.2
+                    if error > 0.5:
+                        error = 1 - error
+                        p = -1
+
+                    
+                    # If this threshold resulted in the smallest error we save the
+                    # configuration
+                    #global min_errors
+                    if error < min_error:
+                        clf.polarity = p
+                        clf.threshold = threshold
+                        clf.feature_index = feature_i
+                        min_error = error
+
+            # Calculate the alpha which is used to update the sample weights,
+            # Alpha is also an approximation of this classifier's proficiency
+            epsilon = 1e-10
+            clf.alpha = 0.5 * math.log((1.0 - min_error) / (min_error + epsilon))
+
+            # Set all predictions to '1' initially
+            predictions = np.ones(np.shape(y))
+
+            # The indexes where the sample values are below threshold
+            negative_idx = (clf.polarity * X[:, clf.feature_index] < clf.polarity * clf.threshold)
+
+            # Label those as '-1'
+            predictions[negative_idx] = -1
+
+            # Calculate new weights 
+            # Missclassified samples gets larger weights and correctly classified samples smaller
+            yByPred = (y * predictions)
+            alpha_Y_Pred = clf.alpha * yByPred
+            w *= np.exp(-alpha_Y_Pred)
+            # Normalize to one
+            w /= np.sum(w)
+
+            # Save classifier
+            self.clfs.append(clf)
+           
+
+
+
+    def predict(self, X):
+        m_samples = np.shape(X)[0]
+        y_pred = np.zeros([m_samples, 1])
+
+        # For each classifier => label the samples
+        for clf in self.clfs:
+            # Set all predictions to '1' initially
+            predictions = np.ones(np.shape(y_pred))
+            # The indexes where the sample values are below threshold
+            negative_idx = (clf.polarity * X[:, clf.feature_index] < clf.polarity * clf.threshold)
+            # Label those as '-1'
+            predictions[negative_idx] = -1
+
+            # Add predictions weighted by the classifiers alpha
+            # (alpha indicative of classifier's proficiency)
+            y_pred += clf.alpha * predictions
+
+        # Return sign of prediction sum
+        y_pred = np.sign(y_pred).flatten()
+
+        return y_pred
 
 
 if __name__ == '__main__':
     #First we get the data
-    X, Y = read_dataset(200)
-    
+    X, Y = read_dataset(100)
 
     #80% is training data and 20% is testing
     Ntrain  = int(0.8*len(X))
-    Xtrain,Ytrain = X[:Ntrain], Y[:Ntrain]
-    Xtest,Ytest = X[Ntrain:], Y[Ntrain:]
+
+    Xtrain,Ytrain = X[:Ntrain ,:], Y[:Ntrain,:]
+    Xtest,Ytest = X[Ntrain:,:], Y[Ntrain:,:]
     
-    
-    T = 200
-    train_errors = np.empty(T)
-    test_losses = np.empty(T)
-    test_errors = np.empty(T)
-    for num_trees in range(T):
-        if num_trees == 0:
-            train_errors [num_trees] = None
-            test_errors [num_trees] = None
-            test_losses [num_trees] = None
-            continue
-        if num_trees % 20 == 0:
-            print (num_trees)
-        model = Adaboost(num_trees)
-        model.fit(Xtrain, Ytrain)
 
-        acc , loss = model.score(Xtest,Ytest)
-        acc_train, _ = model.score(Xtrain ,Ytrain)
+    clf = Adaboost(n_clf=5)
+    clf.fit(Xtrain, Ytrain)
+    y_pred = clf.predict(Xtest)
 
-        train_errors [num_trees] = 1 - acc_train
-        test_errors [num_trees] = 1 - acc
-        test_losses [num_trees] = loss
-        
-        if num_trees == T-1:
-            print("Finalt train error" , 1 - acc_train)
-            print("Finalt test error" , 1 - acc)
-
-    plt.plot(test_errors , label="test errors")
-    plt.plot(test_losses , label="test loss")
-    plt.legend()
-    plt.show()
-
-    plt.plot(train_errors , label="train errors")
-    plt.plot(test_errors , label="test errors")
-    plt.legend()
-    plt.show()
+    accuracy = accuracy_score(Ytest, y_pred)
+    print ("Accuracy:", accuracy)
 
     
-        
