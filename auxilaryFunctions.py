@@ -86,6 +86,21 @@ def normalizeImages (image):
     image =(image - mean) / std
     return image
 
+def calIntegralImage(integralImg,i,j,w,h): # i,j of the index to be calculated while w,h is the size of the feature image
+    topLeft = 0
+    top = 0
+    left = 0
+    if(i - w >= 0 and j - h >= 0):
+        topLeft = integralImg[i - w,j - h]
+    if(i - w >= 0):
+        top = integralImg[i - w,j]
+    if(j - h >= 0):
+        left = integralImg[i ,j - h]
+    print(integralImg[i,j],' ',left,' ',top,' ',topLeft)
+    result = integralImg[i,j] - left - top + topLeft
+    return result
+
+
 
 if __name__ == '__main__':
     print("JI")
