@@ -24,7 +24,7 @@ def calIntegralImage(integralImg,i,j,w,h): # i,j of the index to be calculated w
         top = integralImg[i - w,j]
     if(j - h >= 0):
         left = integralImg[i ,j - h]
-    print(integralImg[i,j],' ',left,' ',top,' ',topLeft)
+    #print(integralImg[i,j],' ',left,' ',top,' ',topLeft)
     result = integralImg[i,j] - left - top + topLeft
     return result
 
@@ -35,16 +35,15 @@ making the viola jones features and counting them
 
 
 def HaarFeatures(image=None):
-    fileInput = open("HaarF.txt","w+") # assuming the image name would be stored in HaarF.txt
     integralInput = image # integral input would hold the intergal of the input image
-    featuresVec = np.zeros(161000) # vector that would hold the 160K features of the 24x24 image
+    featuresVec = np.zeros(162336) # vector that would hold the 160K features of the 24x24 image
     featuresVecCounter = 0 # to move through the indeces
     
     '''
     getting all the features of the shape 1x2
 
     '''
-    
+    print ("Feature 1")
     x = features[0] # x would hold feature 1x2
 
     #values = np.zeros([1,30000])
@@ -65,6 +64,7 @@ def HaarFeatures(image=None):
     getting all the features of the shape 2x1
 
     '''
+    print ("Feature 2")
     x = features[1] # x would hold feature 2x1
 
     for i in range(1,int(24/2)+1): # from i = 1 to i = 12
@@ -81,6 +81,8 @@ def HaarFeatures(image=None):
     getting all the features of the shape 1x3 vertical 3
 
     '''
+    print ("Feature 3")
+    
     x = features[2] # x would hold featue 1x3 vertical 3
 
     for i in range(1,int(24/3)+1): # from i = 1 to i = 8
@@ -99,7 +101,8 @@ def HaarFeatures(image=None):
 
     '''
     x = features[3] # x would hold feature 3x1
-
+    print ("Feature 4")
+    
     for i in range(1,int(24/3)+1): # from i = 1 to i = 8
         for j in range(1,24+1): # from i = 1 to i = 24
             currentFeat = np.zeros((x[0]*i,x[1]*j))
@@ -117,7 +120,7 @@ def HaarFeatures(image=None):
 
     '''
     x = features[4] # x would hold feature 2x2
-
+    print ("Feature 5")
     for i in range(1,int(24/2)+1): # from i = 1 to i = 12
         for j in range(1,int(24/2)+1): # from i = 1 to i = 12
             currentFeat = np.zeros((x[0]*i,x[1]*j))
@@ -130,8 +133,5 @@ def HaarFeatures(image=None):
                     featuresVec[featuresVecCounter] = white-black
                     featuresVecCounter = featuresVecCounter + 1
            
-    fileInput.close()
     return featuresVec
     
-if __name__ == '__main__':
-    HaarFeatures()

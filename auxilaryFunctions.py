@@ -102,5 +102,8 @@ def calIntegralImage(integralImg,i,j,w,h): # i,j of the index to be calculated w
 
 
 
-if __name__ == '__main__':
-    print("JI")
+def accuracy_score(y_true, y_pred):
+    """ Compare y_true to y_pred and return the accuracy """
+    accuracy = np.sum(y_true == y_pred, axis=0) / len(y_true)
+    return accuracy
+
