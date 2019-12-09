@@ -140,23 +140,53 @@ class Adaboost():
 
         return y_pred
 
+    def storeClassifiers (self):
+        Classifiers_Path = "Classifiers/CLFS.txt"
+        file_output = open(Classifiers_Path,"w+")
+
+        for clf in self.clfs:
+            file_output.write(str(clf.feature_index) +" "+str(clf.threshold) +" "+str(clf.alpha) +" "+str(clf.polarity) +"\n")
+
+        file_output.close()
+        return
+
+            
+
+
+
+
 
 if __name__ == '__main__':
     #First we get the data
-    X, Y = read_dataset(100)
+    print ("Training the 160K features to obtain the best 4370 one of them.")
+    print ("Reading the Data")
+    X, Y = read_dataset()
+    print ("Make sure of their shapes :")
+    print (f'Shape of X is {X.shape} --> it should be (23089, 162336)')
+    print (f'Shape of Y is {Y.shape} --> it should be (23089, 1)')
+    assert (X.shape == (23089, 162336)),"X's shape is not correct"
+    assert (Y.shape == (23089, 1)),"X's shape is not correct"
 
     #80% is training data and 20% is testing
-    Ntrain  = int(0.8*len(X))
+    Ntrain  = int(1*len(X))
 
     Xtrain,Ytrain = X[:Ntrain ,:], Y[:Ntrain,:]
     Xtest,Ytest = X[Ntrain:,:], Y[Ntrain:,:]
     
-
-    clf = Adaboost(n_clf=5)
+    #This number is taken from the paper itself (4370)
+    print ("Starting the training stage....")
+    clf = Adaboost(n_clf=4370)
     clf.fit(Xtrain, Ytrain)
-    y_pred = clf.predict(Xtest)
+    print ("Finished training, lets store the trained classifiers..")
+    clf.storeClassifiers()
+    #This prediction is linearizing them, it doesn't obey the principle of cascading
+    # Thus it consumes a lot of time, also, it's used on already sampled data 
+    # print("Done Storing, lets check on the accuracy tested on 5%' on the sampled data")
+    # y_pred = clf.predict(Xtest)
+    # accuracy = accuracy_score(Ytest, y_pred)
+    # print ("Accuracy:", accuracy)
 
-    accuracy = accuracy_score(Ytest, y_pred)
-    print ("Accuracy:", accuracy)
+    #TODO
+    #Create staged classifier detector
 
     
