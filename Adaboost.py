@@ -51,7 +51,8 @@ class Adaboost():
            
             # Iterate throught every unique feature value and see what value
             # makes the best threshold for predicting y
-            for feature_i in range (n_features):
+            #for feature_i in range (n_features):
+            for feature_i in range (4):
                 if(feature_i%1000 == 0):
                     print (f'classifier: {ev} feature: {feature_i}')
                 feature_values = np.expand_dims(X[:, feature_i], axis=1)
@@ -114,8 +115,9 @@ class Adaboost():
 
             # Save classifier
             self.clfs.append(clf)
-           
-
+            #Removing the choosen feature, so as not to be choosen again
+            #X = np.delete(X,clf.feature_index,axis=1)
+            
 
 
     def predict(self, X):
@@ -185,8 +187,3 @@ if __name__ == '__main__':
     # y_pred = clf.predict(Xtest)
     # accuracy = accuracy_score(Ytest, y_pred)
     # print ("Accuracy:", accuracy)
-
-    #TODO
-    #Create staged classifier detector
-
-    
