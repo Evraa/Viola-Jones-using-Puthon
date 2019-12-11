@@ -14,8 +14,6 @@ from classifiers import getLayers
 from computeFeature import computerFeatureFunc
 import time,math
 if __name__ == "__main__":
-
-
     start = time.time()
     #Read an image and convert it into Gray
     img = io.imread("img2.JPG")
