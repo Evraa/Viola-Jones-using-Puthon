@@ -120,7 +120,7 @@ def computerFeatureFunc(box,featureChosen,integralImg):
         '''
         width = width if width < (np.sqrt(boxSize) - j) else (np.sqrt(boxSize) - j)
         
-        '''
+        '''p
         the height of the feature may exceeds the box's size - i as
         boxSize - i is the maximum side the feature's height can hold
         '''
