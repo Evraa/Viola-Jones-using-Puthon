@@ -23,6 +23,7 @@ from sklearn import datasets
 import numpy as np
 from PIL import Image, ImageOps
 import os
+import cv2
 
 
 
@@ -56,12 +57,14 @@ def showHist(img):
     bar(imgHist[1].astype(np.uint8), imgHist[0], width=0.8, align='center')
 
 def Grey_img(image):
-    size = image.shape
-    if (len(size) == 3):
-        grey_image = rgb2gray(image)
-    else:
-        grey_image = image/255
-    return grey_image
+    #return image.convert('LA')
+    return rgb2gray(image)
+    # size = image.shape
+    # if (len(size) == 3):
+    #     grey_image = rgb2gray(image)
+    # else:
+    #     grey_image = image/255
+    # return grey_image
 
 #Resizing images for datasets
 def resizeBy24x24(img_dest):
@@ -69,15 +72,38 @@ def resizeBy24x24(img_dest):
     img_down = img.resize((24, 24), Image.ANTIALIAS)
     return img_down
     
+#Resizing with maintaining aspect ratios
+def RESIZE(image_dst,img_save = None):
+    img = Image.open(image_dst)
+    img_down = img.thumbnail((480, 320))
+    img_down.save(img_save)
+    
+
 #Integral Image function
 def integralImage (image):
     n,m = image.shape
     II = np.zeros((n,m))
-    for i in range(0,n):
-        for j in range(0,m):
+    for i in range(n):
+        for j in range(m):
+            #print (i,j)
             II[i,j] = sum(sum(image[0:i+1,0:j+1]))
-    return II    
+    return II
+
+
+def get_integral_image(imgArr):
+    rowAccumelate = np.zeros(imgArr.shape)
+    integralImg = np.zeros((imgArr.shape[0] + 1, imgArr.shape[1] + 1))
+    for y in range(imgArr.shape[1]):
+        for x in range(imgArr.shape[0]):
+            rowAccumelate[x, y] = rowAccumelate[x-1, y] + imgArr[x, y]
+            integralImg[x + 1, y + 1] = integralImg[x + 1, y] + \
+                rowAccumelate[x, y]
+    return integralImg 
+#another implementation using opensv for higher performance, Doesnt work !
+# def integralImage_OpenCv(image):
+#     return cv2.integral2(image)
 #To get zero mean and unit var. images
+
 def normalizeImages (image):
     max_px = np.max(image)
     min_px = np.min(image)
@@ -96,7 +122,7 @@ def calIntegralImage(integralImg,i,j,w,h): # i,j of the index to be calculated w
         top = integralImg[i - w,j]
     if(j - h >= 0):
         left = integralImg[i ,j - h]
-    print(integralImg[i,j],' ',left,' ',top,' ',topLeft)
+    #print(integralImg[i,j],' ',left,' ',top,' ',topLeft)
     result = integralImg[i,j] - left - top + topLeft
     return result
 

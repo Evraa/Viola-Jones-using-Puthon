@@ -1,17 +1,16 @@
 from auxilaryFunctions import np
 from auxilaryFunctions import calIntegralImage
-def computerFeatureFunc(box,featureIndex,integralImg):
+def computerFeatureFunc(box,featureChosen,integralImg):
     #scaling features
     boxSize = box[0]
     # @ TODO the calFeatures file
-    featureChosen = features[featureIndex] # features should be from the calFeatures file 
+    #featureChosen = features[featureIndex] # features should be from the calFeatures file 
     pattern = featureChosen[0]
     areaPos_i = box[1]
     areaPos_j = box[2]
     sampleSize = 24
     scale = np.sqrt(boxSize) / sampleSize
-    print('scale = ',scale)
-
+    
     #scaling the i and j of the feature
     i = featureChosen[1]
     j = featureChosen[2]
@@ -46,7 +45,7 @@ def computerFeatureFunc(box,featureIndex,integralImg):
         the height of the feature may exceeds the box's size - i as
         boxSize - i is the maximum side the feature's height can hold
         '''
-        height = np.min(height, np.sqrt(boxSize) - i) 
+        height = height if height < (np.sqrt(boxSize) - i) else (np.sqrt(boxSize) - i) 
         
         '''
         the width of the feature may exceeds the box's size - j as
@@ -68,7 +67,8 @@ def computerFeatureFunc(box,featureIndex,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 2
-        reScale = originArea/width*height
+        reScale = originArea/(width*height)
+        
         featureResult = featureResult * reScale
         return featureResult
 
@@ -78,7 +78,7 @@ def computerFeatureFunc(box,featureIndex,integralImg):
         the height of the feature may exceeds the box's size - i as
         boxSize - i is the maximum side the feature's height can hold
         '''
-        height = np.min(height, np.sqrt(boxSize) - i) 
+        height = height if height < (np.sqrt(boxSize) - i) else (np.sqrt(boxSize) - i) 
         #we should make sure that width is divisible by 3 after scaling
         width = width if width % 3 == 0 else ((width + 2 if width % 3 == 1 else width + 1)) 
 
@@ -102,12 +102,8 @@ def computerFeatureFunc(box,featureIndex,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 3
-        reScale = originArea/width*height
-        '''
-        
-        remaining the mean but we must understand it
-        
-        '''
+        reScale = originArea/(width*height)
+
         featureResult = featureResult * reScale
         return featureResult
 
@@ -118,7 +114,7 @@ def computerFeatureFunc(box,featureIndex,integralImg):
         the width of the feature may exceeds the box's size - j as
         boxSize - j is the maximum side the feature's width can hold
         '''
-        width = np.min(width, np.sqrt(boxSize) - j)
+        width = width if width < (np.sqrt(boxSize) - j) else (np.sqrt(boxSize) - j)
         
         '''
         the height of the feature may exceeds the box's size - i as
@@ -141,7 +137,7 @@ def computerFeatureFunc(box,featureIndex,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 2
-        reScale = originArea/width*height
+        reScale = originArea/(width*height)
         
         featureResult = featureResult * reScale
         return featureResult
@@ -153,7 +149,7 @@ def computerFeatureFunc(box,featureIndex,integralImg):
         the width of the feature may exceeds the box's size - j as
         boxSize - j is the maximum side the feature's width can hold
         '''
-        width = np.min(width, np.sqrt(boxSize) - j)
+        width = width if (width < (np.sqrt(boxSize) - j)) else (np.sqrt(boxSize) - j) 
         
         '''
         the height of the feature may exceeds the box's size - i as
@@ -178,13 +174,7 @@ def computerFeatureFunc(box,featureIndex,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 2
-        reScale = originArea/width*height
-
-        '''
-        
-        remaining the mean but we must understand it
-        
-        '''
+        reScale = originArea/(width*height)
 
         featureResult = featureResult * reScale
         return featureResult
@@ -230,7 +220,8 @@ def computerFeatureFunc(box,featureIndex,integralImg):
         
         featureResult = (white-black)
         #rescale the feature to its original scale
-        reScale = originArea/width*height
+        reScale = originArea/(width*height)
+
         featureResult = featureResult * reScale
         return featureResult
         
