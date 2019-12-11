@@ -3,7 +3,7 @@ from auxilaryFunctions import calIntegralImage
 from auxilaryFunctions import Grey_img,integralImage,Image,np,io,get_integral_image
 from classifiers import getLayers
 import time,math
-from stages import cascade
+from stages import *
 
 def computerFeatureFunc(box,featureChosen,integralImg):
     #scaling features
@@ -240,6 +240,9 @@ class Rect:
         self.startBox = startBox
         self.endBox = endBox
 def detect_face(frame, frameWidth, frameHeight):
+    image = Grey_img(frame)
+    norm_image = normalizeImages(image)
+    iimage = get_integral_image(norm_image)
     rects = []
     startBox = (0,0)
     endBox = (startBox[0]+minSize, startBox[1]+minSize)
@@ -250,6 +253,7 @@ def detect_face(frame, frameWidth, frameHeight):
                 startBox = (w,h)
                 endBox = (w+b, h+b)
                 rect_object = Rect(startBox, endBox)
-                if(cascade(rect_object)):
+                if(cascade(rect_object,iimage)):
                     rects.append([rect_object])
     return rects
+

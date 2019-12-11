@@ -9,7 +9,7 @@
 # 4- when it fails any Layer of classifiers, we should consider that window as FALSE
 # 5- If it passed, then its a face
 
-from auxilaryFunctions import Grey_img,integralImage,Image,np,io,get_integral_image
+from auxilaryFunctions import Grey_img,integralImage,Image,np,io,get_integral_image,normalizeImages
 from classifiers import getLayers
 from computeFeature import computerFeatureFunc
 import time,math
