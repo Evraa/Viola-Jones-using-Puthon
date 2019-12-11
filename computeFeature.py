@@ -107,9 +107,9 @@ def computerFeatureFunc(box,featureChosen,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 3
-        reScale = originArea/(width*height)
+        reScale = (width*height)/originArea
 
-        featureResult = featureResult * reScale
+        featureResult /= reScale
         return featureResult
 
     #scaling the feature pattern one i.e. 2x1 feature
@@ -142,9 +142,9 @@ def computerFeatureFunc(box,featureChosen,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 2
-        reScale = originArea/(width*height)
-        
-        featureResult = featureResult * reScale
+        reScale = (width*height)/originArea
+
+        featureResult /= reScale
         return featureResult
         
     #scaling the feature pattern one i.e. 3x1 feature
@@ -179,9 +179,9 @@ def computerFeatureFunc(box,featureChosen,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 2
-        reScale = originArea/(width*height)
+        reScale = (width*height)/originArea
 
-        featureResult = featureResult * reScale
+        featureResult /= reScale
         return featureResult
 
     #scaling the feature pattern one i.e. 2x2 feature
@@ -225,9 +225,9 @@ def computerFeatureFunc(box,featureChosen,integralImg):
         
         featureResult = (white-black)
         #rescale the feature to its original scale
-        reScale = originArea/(width*height)
+        reScale = (width*height)/originArea
 
-        featureResult = featureResult * reScale
+        featureResult /= reScale
         return featureResult
 
 #return rects
