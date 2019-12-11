@@ -3,6 +3,7 @@ from auxilaryFunctions import calIntegralImage
 from auxilaryFunctions import Grey_img,integralImage,Image,np,io,get_integral_image
 from classifiers import getLayers
 import time,math
+from stages import *
 
 def computerFeatureFunc(box,featureChosen,integralImg):
     #scaling features
@@ -106,9 +107,9 @@ def computerFeatureFunc(box,featureChosen,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 3
-        reScale = originArea/(width*height)
+        reScale = (width*height)/originArea
 
-        featureResult = featureResult * reScale
+        featureResult /= reScale
         return featureResult
 
     #scaling the feature pattern one i.e. 2x1 feature
@@ -141,9 +142,9 @@ def computerFeatureFunc(box,featureChosen,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 2
-        reScale = originArea/(width*height)
-        
-        featureResult = featureResult * reScale
+        reScale = (width*height)/originArea
+
+        featureResult /= reScale
         return featureResult
         
     #scaling the feature pattern one i.e. 3x1 feature
@@ -178,9 +179,9 @@ def computerFeatureFunc(box,featureChosen,integralImg):
         featureResult = (white-black)
         #rescale the feature to its original scale
         #multiply the originArea by 2
-        reScale = originArea/(width*height)
+        reScale = (width*height)/originArea
 
-        featureResult = featureResult * reScale
+        featureResult /= reScale
         return featureResult
 
     #scaling the feature pattern one i.e. 2x2 feature
@@ -224,9 +225,9 @@ def computerFeatureFunc(box,featureChosen,integralImg):
         
         featureResult = (white-black)
         #rescale the feature to its original scale
-        reScale = originArea/(width*height)
+        reScale = (width*height)/originArea
 
-        featureResult = featureResult * reScale
+        featureResult /= reScale
         return featureResult
 
 #return rects
@@ -239,6 +240,9 @@ class Rect:
         self.startBox = startBox
         self.endBox = endBox
 def detect_face(frame, frameWidth, frameHeight):
+    image = Grey_img(frame)
+    norm_image = normalizeImages(image)
+    iimage = get_integral_image(norm_image)
     rects = []
     startBox = (0,0)
     endBox = (startBox[0]+minSize, startBox[1]+minSize)
@@ -249,40 +253,7 @@ def detect_face(frame, frameWidth, frameHeight):
                 startBox = (w,h)
                 endBox = (w+b, h+b)
                 rect_object = Rect(startBox, endBox)
-                if(cascading(rect_object)):
+                if(cascade(rect_object,iimage)):
                     rects.append([rect_object])
     return rects
 
-def cascading(rect_object):
-    isFace = False
-    start = time.time()
-    #Read an image and convert it into Gray
-    img = io.imread("img2.JPG")
-    img = Grey_img(img)
-    iimg = get_integral_image(img)
-    
-    end1 = time.time()
-    print ("Reading img and getting its integral: ",end1-start)
-    
-    Layers = getLayers()
-    
-    end2 = time.time()
-    print ("Obtaining Layers in: ",end2-end1)
-    stage =[]
-    layer = Layers[0]
-    for feature in layer:
-        feature_id = feature[0:7]
-        areaBox = (rect_object.endBox[0] - rect_object.startBox[0]) ** 2
-        BoxI = rect_object.startBox[1]
-        BoxJ = rect_object.startBox[0]
-        feature_value = (computerFeatureFunc([areaBox,BoxI,BoxJ],feature_id,iimg))
-        #Still didint add the tweak value
-        if feature_value > feature[8]: 
-            vote = feature[9]
-        else:
-            vote = -feature[9]
-        
-        #no 0.5 since only sign matters
-        prediction = vote*math.log(1/feature[7] -1)
-        print (prediction)
-    return isFace
